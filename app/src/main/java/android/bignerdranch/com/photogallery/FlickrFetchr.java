@@ -3,6 +3,9 @@ package android.bignerdranch.com.photogallery;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +16,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FlickrFetchr {
@@ -32,7 +36,7 @@ public class FlickrFetchr {
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             InputStream in = connection.getInputStream();
@@ -73,23 +77,31 @@ public class FlickrFetchr {
             // Log.i(TAG, "URL :" + url);
             Log.i(TAG, "Received JSON: " + jsonString);
 
-            JSONObject jsonBody = new JSONObject(jsonString);
+            //JSONObject jsonBody = new JSONObject(jsonString);
+            //parseItems2(items, jsonBody);
 
-            parseItems(items, jsonBody);
-
-            Log.i(TAG, "items :" + items.toString());
+            // Gson
+            items = parseItems(jsonString);
 
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items", ioe);
 
-        } catch (JSONException je) {
-            Log.e(TAG, "Failed to parse JSON", je);
         }
 
         return items;
     }
 
-    private void parseItems(List<GalleryItem> items, JSONObject jsonBody)
+    private List<GalleryItem> parseItems(String jsonString) {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        Gallery gallery = gson.fromJson(jsonString, Gallery.class);
+
+        return gallery.getPhotos().getPhoto();
+    }
+
+    @Deprecated
+    private void parseItems2(List<GalleryItem> items, JSONObject jsonBody)
             throws IOException, JSONException {
         JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
         JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
