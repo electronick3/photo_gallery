@@ -61,7 +61,7 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems() {
+    public List<GalleryItem> fetchItems(Integer page) {
         List<GalleryItem> items = new ArrayList<>();
 
         try {
@@ -72,10 +72,11 @@ public class FlickrFetchr {
                     .appendQueryParameter("format", "json")
                     .appendQueryParameter("nojsoncallback", "1")
                     .appendQueryParameter("extras", "url_s")
+                    .appendQueryParameter("page", (page != -1) ? String.valueOf(page) : "1")
                     .build().toString();
             String jsonString = getUrlString(url);
             // Log.i(TAG, "URL :" + url);
-            Log.i(TAG, "Received JSON: " + jsonString);
+            // Log.i(TAG, "Received JSON: " + jsonString);
 
             //JSONObject jsonBody = new JSONObject(jsonString);
             //parseItems2(items, jsonBody);

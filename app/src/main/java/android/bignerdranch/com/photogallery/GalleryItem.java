@@ -41,6 +41,7 @@ public class GalleryItem {
     @NonNull
     @Override
     public String toString() {
-        return mCaption;
+        // return mCaption;
+        return mId;
     }
 }
