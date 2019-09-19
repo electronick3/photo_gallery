@@ -34,6 +34,18 @@ public class FlickrFetchr {
     private static final String TAG = "FlickrFetchr";
     private static final String API_KEY = "fe43ef2cb36dc9bf8e0b472ec98c22be";
 
+    private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
+    private static final String SEARCH_METHOD = "flickr.photos.search";
+    private static final Uri ENDPOINT = Uri
+            .parse("https://api.flickr.com/services/rest/")
+            .buildUpon()
+            .appendQueryParameter("api_key", API_KEY)
+            .appendQueryParameter("format", "json")
+            .appendQueryParameter("nojsoncallback", "1")
+            .appendQueryParameter("extras", "url_s")
+            .build();
+
+
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -61,22 +73,13 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems(Integer page) {
+    private List<GalleryItem> downloadGalleryItems(String url) {
         List<GalleryItem> items = new ArrayList<>();
 
         try {
-            String url = Uri.parse("https://api.flickr.com/services/rest/")
-                    .buildUpon()
-                    .appendQueryParameter("method", "flickr.photos.getRecent")
-                    .appendQueryParameter("api_key", API_KEY)
-                    .appendQueryParameter("format", "json")
-                    .appendQueryParameter("nojsoncallback", "1")
-                    .appendQueryParameter("extras", "url_s")
-                    .appendQueryParameter("page", (page != -1) ? String.valueOf(page) : "1")
-                    .build().toString();
             String jsonString = getUrlString(url);
-            // Log.i(TAG, "URL :" + url);
             // Log.i(TAG, "Received JSON: " + jsonString);
+            Log.i(TAG, "URL :" + url);
 
             //JSONObject jsonBody = new JSONObject(jsonString);
             //parseItems2(items, jsonBody);
@@ -86,10 +89,29 @@ public class FlickrFetchr {
 
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items", ioe);
-
         }
 
         return items;
+    }
+
+    public List<GalleryItem> fetchRecentPhotos(String page) {
+        String url = buildUrl(FETCH_RECENTS_METHOD, null, page);
+        return downloadGalleryItems(url);
+    }
+
+    public List<GalleryItem> searchPhotos(String query, String page) {
+        String url = buildUrl(SEARCH_METHOD, query, page);
+        return downloadGalleryItems(url);
+    }
+
+    private String buildUrl(String method, String query, String page) {
+        Uri.Builder uriBuilder = ENDPOINT.buildUpon()
+                .appendQueryParameter("method", method);
+        if (query != null) { uriBuilder.appendQueryParameter("text", query);}
+        if (page == null) {uriBuilder.appendQueryParameter("page", "1");}
+        else {uriBuilder.appendQueryParameter("page", page);}
+
+        return uriBuilder.build().toString();
     }
 
     private List<GalleryItem> parseItems(String jsonString) {
@@ -99,23 +121,5 @@ public class FlickrFetchr {
         Gallery gallery = gson.fromJson(jsonString, Gallery.class);
 
         return gallery.getPhotos().getPhoto();
-    }
-
-    @Deprecated
-    private void parseItems2(List<GalleryItem> items, JSONObject jsonBody)
-            throws IOException, JSONException {
-        JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
-        JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
-        for (int i = 0; i < photoJsonArray.length(); i++) {
-            JSONObject photoJsonObject = photoJsonArray.getJSONObject(i);
-            GalleryItem item = new GalleryItem();
-            item.setId(photoJsonObject.getString("id"));
-            item.setCaption(photoJsonObject.getString("title"));
-            if (!photoJsonObject.has("url_s")) {
-                continue;
-            }
-            item.setUrl(photoJsonObject.getString("url_s"));
-            items.add(item);
-        }
     }
 }

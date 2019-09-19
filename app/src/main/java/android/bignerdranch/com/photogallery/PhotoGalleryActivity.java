@@ -1,11 +1,6 @@
 package android.bignerdranch.com.photogallery;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-
-import android.os.Bundle;
-
-
 
 public class PhotoGalleryActivity extends SingleFragmentActivity {
 
@@ -18,4 +13,5 @@ public class PhotoGalleryActivity extends SingleFragmentActivity {
     protected int getLayoutResId() {
         return super.getLayoutResId();
     }
+
 }
