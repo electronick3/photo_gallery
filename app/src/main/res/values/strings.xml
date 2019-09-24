@@ -1,5 +1,9 @@
 <resources>
-    <string name="app_name">Фото галерея</string>
+    <string name="app_name"> === </string>
     <string name="search">Поиск</string>
     <string name="clear_search">Очистить поиск</string>
+    <string name="start_polling">Начать опрос</string>
+    <string name="stop_polling">Остановить опрос</string>
+    <string name="new_pictures_title">Новые фотографии</string>
+    <string name="new_pictures_text">You have new pictures in PhotoGallery.</string>
 </resources>

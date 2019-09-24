@@ -32,10 +32,16 @@ public class FlickrFetchr {
      * */
 
     private static final String TAG = "FlickrFetchr";
+    private static final String TAG_TEST = "TestURL";
+
     private static final String API_KEY = "fe43ef2cb36dc9bf8e0b472ec98c22be";
 
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
+
+    private static final boolean ONLY_A_TEST = true;
+
+
     private static final Uri ENDPOINT = Uri
             .parse("https://api.flickr.com/services/rest/")
             .buildUpon()
@@ -95,12 +101,28 @@ public class FlickrFetchr {
     }
 
     public List<GalleryItem> fetchRecentPhotos(String page) {
-        String url = buildUrl(FETCH_RECENTS_METHOD, null, page);
+        String url = "";
+
+        if (!ONLY_A_TEST) {
+            url = buildUrl(FETCH_RECENTS_METHOD, null, page);
+        }
+        else {
+            url = buildTestUrl();
+        }
+
         return downloadGalleryItems(url);
     }
 
     public List<GalleryItem> searchPhotos(String query, String page) {
-        String url = buildUrl(SEARCH_METHOD, query, page);
+        String url = "";
+
+        if (!ONLY_A_TEST) {
+            url = buildUrl(SEARCH_METHOD, query, page);
+        }
+        else {
+            url = buildTestUrl();
+        }
+
         return downloadGalleryItems(url);
     }
 
@@ -112,6 +134,18 @@ public class FlickrFetchr {
         else {uriBuilder.appendQueryParameter("page", page);}
 
         return uriBuilder.build().toString();
+    }
+
+    private String buildTestUrl() {
+        Uri.Builder uriBuilder = ENDPOINT.buildUpon().
+                appendQueryParameter("method", SEARCH_METHOD);
+        uriBuilder.appendQueryParameter("text", "Busness");
+        uriBuilder.appendQueryParameter("page", "1");
+
+        String rr = uriBuilder.build().toString();
+
+        Log.i(TAG_TEST, "Test URL = " + rr);
+        return rr;
     }
 
     private List<GalleryItem> parseItems(String jsonString) {
